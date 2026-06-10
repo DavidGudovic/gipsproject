@@ -1,0 +1,20 @@
+{
+  "name": "gipsproject",
+  "version": "1.0.0",
+  "description": "Presentation website for drywall company",
+  "homepage": "https://github.com/DavidGudovic/gipsproject#readme",
+  "bugs": {
+    "url": "https://github.com/DavidGudovic/gipsproject/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DavidGudovic/gipsproject.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
