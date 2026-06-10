@@ -35,7 +35,7 @@ window.GP_I18N.sr = {
   "services.finishing.desc": "Gletovanje i krečenje do savršeno glatkih zidova, spremnih za život.",
 
   "work.eyebrow": "Portfolio",
-  "work.title": "Naši <em>radovi</em>",
+  "work.title": "Naš <em>rad</em>",
   "work.lead": "Izbor iz projekata koje smo nedavno završili.",
 
   "why.eyebrow": "Zašto mi",
@@ -55,7 +55,7 @@ window.GP_I18N.sr = {
   "contact.call": "Pozovite nas",
   "contact.whatsapp": "Pišite nam na WhatsApp",
   "contact.email": "Pošaljite nam email",
-  "contact.instagram": "Pratite naše radove na Instagramu",
+  "contact.instagram": "Pratite naš rad na Instagramu",
 
   "footer.tagline": "Gipsani i suvomontažni radovi",
 

@@ -71,18 +71,18 @@
 <div class="page-bg" aria-hidden="true"></div>
 
 <header id="site-header" class="site-header fixed inset-x-0 top-0 z-40 bg-paper/80 backdrop-blur-md">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3">
-        <a href="#hero" class="shrink-0" aria-label="GIPS PROJECT">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 md:grid md:grid-cols-[1fr_auto_1fr]">
+        <a href="#hero" class="shrink-0 justify-self-start" aria-label="GIPS PROJECT">
             <img src="assets/img/logo.webp" alt="GIPS PROJECT" width="480" height="435" class="h-11 w-auto">
         </a>
 
-        <nav class="hidden items-center gap-8 text-sm font-semibold md:flex" aria-label="Glavna navigacija">
+        <nav class="hidden items-center gap-8 text-sm font-semibold md:flex md:justify-self-center" aria-label="Glavna navigacija">
             <a href="#services" class="transition-colors hover:text-gold-deep" data-i18n="nav.services">Usluge</a>
             <a href="#work" class="transition-colors hover:text-gold-deep" data-i18n="nav.work">Naši radovi</a>
             <a href="#contact" class="transition-colors hover:text-gold-deep" data-i18n="nav.contact">Kontakt</a>
         </nav>
 
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 md:justify-self-end">
             <div class="flex items-center overflow-hidden rounded-full border border-ink/15 text-xs font-bold" role="group" data-i18n-attrs="aria-label:nav.langLabel" aria-label="Promijeni jezik">
                 <button type="button" data-lang-btn="sr" class="px-2.5 py-1.5 transition-colors aria-pressed:bg-gold-deep aria-pressed:text-paper" aria-pressed="true">SR</button>
                 <button type="button" data-lang-btn="en" class="px-2.5 py-1.5 transition-colors aria-pressed:bg-gold-deep aria-pressed:text-paper" aria-pressed="false">EN</button>
@@ -121,7 +121,7 @@
 
             <p class="reveal mt-9 text-[11.5px] font-semibold uppercase tracking-[.42em] text-gold-deep" style="--reveal-delay:.1s" data-i18n="hero.eyebrow">Gipsani i suvomontažni radovi · Crna Gora</p>
 
-            <h1 class="gold-em reveal mt-4 font-display text-[clamp(32px,7vw,52px)] font-medium leading-[1.08] tracking-tight" style="--reveal-delay:.2s" data-i18n="hero.title">Savršeni zidovi i plafoni, <em>na vrijeme</em>.</h1>
+            <h1 class="gold-em reveal mt-4 text-balance font-display text-[clamp(32px,7vw,52px)] font-medium leading-[1.08] tracking-tight" style="--reveal-delay:.2s" data-i18n="hero.title">Savršeni zidovi i plafoni, <em>na vrijeme</em>.</h1>
 
             <p class="reveal mx-auto mt-5 max-w-md text-[15.5px] leading-relaxed text-ink-soft" style="--reveal-delay:.3s" data-i18n="hero.lead">Od spuštenih plafona do dekorativnog gipsa — radimo kvalitetno, precizno i na vrijeme, za domove i poslovne prostore širom Crne Gore.</p>
 
@@ -149,7 +149,7 @@
         <div class="mx-auto max-w-6xl">
             <div class="reveal text-center">
                 <p class="text-[11.5px] font-semibold uppercase tracking-[.42em] text-gold-deep" data-i18n="services.eyebrow">Šta radimo</p>
-                <h2 class="gold-em mt-3 font-display text-3xl font-medium md:text-4xl" data-i18n="services.title">Naše <em>usluge</em></h2>
+                <h2 class="gold-em mt-3 text-balance font-display text-3xl font-medium md:text-4xl" data-i18n="services.title">Naše <em>usluge</em></h2>
             </div>
 
             <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,7 +192,7 @@
         <div class="mx-auto max-w-6xl">
             <div class="reveal text-center">
                 <p class="text-[11.5px] font-semibold uppercase tracking-[.42em] text-gold-deep" data-i18n="work.eyebrow">Portfolio</p>
-                <h2 class="gold-em mt-3 font-display text-3xl font-medium md:text-4xl" data-i18n="work.title">Naši <em>radovi</em></h2>
+                <h2 class="gold-em mt-3 text-balance font-display text-3xl font-medium md:text-4xl" data-i18n="work.title">Naši <em>radovi</em></h2>
                 <p class="mt-3 text-[15px] text-ink-soft" data-i18n="work.lead">Izbor iz projekata koje smo nedavno završili.</p>
             </div>
 
@@ -205,7 +205,7 @@
         <div class="mx-auto max-w-6xl">
             <div class="reveal text-center">
                 <p class="text-[11.5px] font-semibold uppercase tracking-[.42em] text-gold-deep" data-i18n="why.eyebrow">Zašto mi</p>
-                <h2 class="gold-em mt-3 font-display text-3xl font-medium md:text-4xl" data-i18n="why.title">Zašto <em>GIPS PROJECT</em>?</h2>
+                <h2 class="gold-em mt-3 text-balance font-display text-3xl font-medium md:text-4xl" data-i18n="why.title">Zašto <em>GIPS PROJECT</em>?</h2>
             </div>
 
             <div class="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
@@ -239,7 +239,7 @@
             <div class="rule reveal mb-12"></div>
 
             <p class="reveal text-[11.5px] font-semibold uppercase tracking-[.42em] text-gold-deep" data-i18n="contact.eyebrow">Kontakt</p>
-            <h2 class="gold-em reveal mt-3 font-display text-3xl font-medium md:text-4xl" style="--reveal-delay:.08s" data-i18n="contact.title">Spremni za <em>početak</em>?</h2>
+            <h2 class="gold-em reveal mt-3 text-balance font-display text-3xl font-medium md:text-4xl" style="--reveal-delay:.08s" data-i18n="contact.title">Spremni za <em>početak</em>?</h2>
             <p class="reveal mt-3 text-[15px] text-ink-soft" style="--reveal-delay:.16s" data-i18n="contact.lead">Javite nam se za besplatnu procjenu — odgovaramo brzo.</p>
 
             <div class="reveal mt-9 flex flex-col items-stretch gap-3.5" style="--reveal-delay:.24s">
@@ -278,7 +278,7 @@
             <a href="mailto:cg@gipsproject.me" class="transition-colors hover:text-gold-deep">cg@gipsproject.me</a>
             <a href="https://www.instagram.com/gips_project/" target="_blank" rel="noopener" class="transition-colors hover:text-gold-deep">@gips_project</a>
         </p>
-        <p class="text-xs text-ink-soft/70">Made with <span class="text-gold-deep">♥</span> by David Gudović</p>
+        <p class="text-xs text-ink-soft/70">Made with <span class="text-gold-deep">♥</span> by <a href="https://www.linkedin.com/in/david-gudovic/" target="_blank" rel="noopener" class="underline decoration-ink-soft/30 underline-offset-2 transition-colors hover:text-gold-deep">David Gudović</a></p>
     </div>
 </footer>
 

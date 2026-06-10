@@ -10,6 +10,8 @@
     "contact.title"
   ]);
 
+  // DEFAULT LANGUAGE: the final return below. Order: ?lang= URL param,
+  // then the visitor's saved choice, then Serbian.
   function detectLang() {
     const param = new URLSearchParams(location.search).get("lang");
     if (param === "en" || param === "sr") return param;
@@ -17,7 +19,7 @@
       const saved = localStorage.getItem(STORE_KEY);
       if (saved === "en" || saved === "sr") return saved;
     } catch (e) { /* private mode */ }
-    return (navigator.language || "").toLowerCase().startsWith("en") ? "en" : "sr";
+    return "sr";
   }
 
   function applyLang(lang) {
