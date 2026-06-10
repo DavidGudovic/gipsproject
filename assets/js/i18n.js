@@ -1,6 +1,7 @@
 // Locale engine: detects language, applies copy from locales/*.js, persists the choice.
 (function () {
-  const STORE_KEY = "gp-lang";
+  // v2: the old key was polluted by auto-detected (not user-chosen) values
+  const STORE_KEY = "gp-lang2";
   // keys whose values contain markup (gold <em> accents) — applied via innerHTML
   const HTML_KEYS = new Set([
     "hero.title",
@@ -45,9 +46,14 @@
       btn.setAttribute("aria-pressed", String(btn.dataset.langBtn === lang));
     });
 
-    try { localStorage.setItem(STORE_KEY, lang); } catch (e) { /* private mode */ }
     window.GP_LANG = lang;
     document.dispatchEvent(new CustomEvent("gp:langchange", { detail: { lang } }));
+  }
+
+  // persisting only happens here — an explicit visitor choice, never auto-detection
+  function chooseLang(lang) {
+    applyLang(lang);
+    try { localStorage.setItem(STORE_KEY, lang); } catch (e) { /* private mode */ }
   }
 
   window.GP_LANG = detectLang();
@@ -55,7 +61,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     applyLang(window.GP_LANG);
     document.querySelectorAll("[data-lang-btn]").forEach((btn) => {
-      btn.addEventListener("click", () => applyLang(btn.dataset.langBtn));
+      btn.addEventListener("click", () => chooseLang(btn.dataset.langBtn));
     });
   });
 })();

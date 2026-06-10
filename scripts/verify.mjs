@@ -63,10 +63,16 @@ const check = (name, ok, extra = "") => {
   const h1en = await page.$eval("h1", (el) => el.textContent.trim());
   check("EN toggle swaps h1", h1en.includes("Flawless"), h1en);
   check("html lang becomes en", (await page.evaluate(() => document.documentElement.lang)) === "en");
-  check("choice persisted", (await page.evaluate(() => localStorage.getItem("gp-lang"))) === "en");
+  check("choice persisted", (await page.evaluate(() => localStorage.getItem("gp-lang2"))) === "en");
   const altEn = await page.$eval("#work-grid img", (el) => el.alt);
   check("gallery alt switches to EN", /ceiling/i.test(altEn), altEn);
   await page.click('[data-lang-btn="sr"]');
+
+  // — stale auto-detected lang under the old key must be ignored —
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem("gp-lang", "en"); });
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
+  check("stale old-key 'en' ignored, stays SR", (await page.$eval("h1", (el) => el.textContent)).includes("Savršeni"));
+  check("auto-detect does not persist", (await page.evaluate(() => localStorage.getItem("gp-lang2"))) === null);
 
   // — ?lang=en param —
   await page.goto(`${BASE}/?lang=sr`, { waitUntil: "networkidle0" });
