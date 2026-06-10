@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@source "../index.html";
+@source "../assets/js";
+@source "../locales";
+@source "../content";
+
+@theme {
+  --color-ink: #2c2d30;
+  --color-ink-soft: #63656b;
+  --color-gold: #bd9656;
+  --color-gold-deep: #9c7a3f;
+  --color-gold-light: #e3cd9f;
+  --color-cream: #f4eee4;
+  --color-paper: #fbf8f2;
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ——— effects carried over from the original GIPS PROJECT parking page ——— */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background: var(--color-gold-light);
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* fixed background layers instead of background-attachment:fixed (broken on iOS) */
+  .page-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(120% 90% at 50% -10%, #fffdf8 0%, var(--color-paper) 38%, var(--color-cream) 100%);
+  }
+  .page-bg::before {
+    /* fine plaster grain */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+  }
+  .page-bg::after {
+    /* soft gold corner glows */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(40% 40% at 88% 12%, rgba(189, 150, 86, 0.16), transparent 70%),
+      radial-gradient(45% 45% at 8% 92%, rgba(189, 150, 86, 0.12), transparent 70%);
+  }
+
+  /* gold divider with diamond dot */
+  .rule {
+    width: 118px;
+    height: 1px;
+    margin-inline: auto;
+    background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+    position: relative;
+  }
+  .rule::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-gold);
+    transform: translate(-50%, -50%) rotate(45deg);
+    box-shadow: 0 0 0 4px var(--color-paper);
+  }
+
+  /* scroll-triggered rise-in (IntersectionObserver adds .is-visible) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+    transition-delay: var(--reveal-delay, 0s);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .gold-em em {
+    font-style: italic;
+    color: var(--color-gold-deep);
+  }
+
+  .site-header {
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  }
+  .site-header.is-scrolled {
+    background: rgba(251, 248, 242, 0.92);
+    box-shadow: 0 6px 24px rgba(44, 45, 48, 0.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

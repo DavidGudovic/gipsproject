@@ -13,8 +13,17 @@
   "license": "ISC",
   "author": "",
   "type": "commonjs",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tailwindcss -i css/input.css -o assets/css/main.css --minify",
+    "dev": "node scripts/dev.mjs",
+    "images": "node scripts/convert-images.mjs",
+    "extract-logo": "node scripts/extract-logo.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "http-server": "^14.1.1",
+    "puppeteer-core": "^25.1.0",
+    "sharp": "^0.35.0",
+    "tailwindcss": "^4.3.0"
   }
 }
