@@ -46,7 +46,7 @@ for (const [lang, t] of Object.entries(locales)) {
   const blocks = {
     imageCount: images.length,
     // These faces are all used in the first screen; preload only the locale's glyph sets.
-    fontPreloads: ["fraunces-italic-latin", ...(lang === "sr" ? ["fraunces-ext", "fraunces-italic-ext", "manrope-ext"] : [])].map(name => '<link rel="preload" href="/assets/fonts/' + name + '.woff2" as="font" type="font/woff2" crossorigin>').join("\n  "),
+    fontPreloads: ["ibm-plex-sans-latin", ...(lang === "sr" ? ["ibm-plex-sans-ext"] : [])].map(name => '<link rel="preload" href="/assets/fonts/' + name + '.woff2" as="font" type="font/woff2" crossorigin>').join("\n  "),
     "work.count": esc(t["work.count"].replace("{count}", images.length)),
     ogImageAlt: esc(images[0].alt[lang]),
     htmlLang: lang === "sr" ? "sr-Latn" : "en", url, home, version,
