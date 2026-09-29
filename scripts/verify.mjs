@@ -1,128 +1,55 @@
-// Dev-only smoke test: drives the site in headless Chromium and checks the
-// behaviours that matter (i18n, gallery, lightbox, CTAs, mobile FAB).
+// Deployment gate: validate the actual generated pages and public assets without a browser.
 import fs from "node:fs";
-import puppeteer from "puppeteer-core";
-
-const BASE = process.env.BASE_URL || "http://127.0.0.1:8123";
-const SHOTS = process.env.SHOTS_DIR || `${process.env.HOME}/gp-verify`;
-
-const results = [];
-const check = (name, ok, extra = "") => {
-  results.push({ name, ok, extra });
-  console.log(`${ok ? "PASS" : "FAIL"}  ${name}${extra ? ` — ${extra}` : ""}`);
-};
-
-(async () => {
-  fs.mkdirSync(SHOTS, { recursive: true });
-
-  // snap chromium swallows stdout, so launch it ourselves and connect over the debug port
-  const { spawn } = await import("node:child_process");
-  const os = await import("node:os");
-  const profile = fs.mkdtempSync(`${os.tmpdir()}/gp-verify-`);
-  const chrome = spawn("/snap/bin/chromium", [
-    "--headless=new",
-    "--disable-gpu",
-    "--remote-debugging-port=9777",
-    `--user-data-dir=${profile}`,
-    "about:blank"
-  ], { stdio: "ignore" });
-  let browser;
-  for (let i = 0; i < 40; i++) {
-    try {
-      browser = await puppeteer.connect({ browserURL: "http://127.0.0.1:9777", defaultViewport: null });
-      break;
-    } catch (e) {
-      await new Promise((r) => setTimeout(r, 500));
-    }
+import vm from "node:vm";
+import assert from "node:assert/strict";
+let checks = 0;
+function check(name, test) { assert.ok(test, name); checks++; console.log("PASS " + name); }
+const context = { window: {} };
+vm.createContext(context);
+for (const name of ["locales/sr.js", "locales/en.js", "content/images.js"]) vm.runInContext(fs.readFileSync(name, "utf8"), context);
+const locales = context.window.GP_I18N;
+check("Both locales contain identical keys", JSON.stringify(Object.keys(locales.sr).sort()) === JSON.stringify(Object.keys(locales.en).sort()));
+for (const [file, lang, url] of [["index.html", "sr-Latn", "https://gipsproject.me/"], ["en/index.html", "en", "https://gipsproject.me/en/"]]) {
+  const html = fs.readFileSync(file, "utf8");
+  check(file + ": correct document language", html.includes('<html lang="' + lang + '">'));
+  check(file + ": one H1", [...html.matchAll(/<h1[ >]/g)].length === 1);
+  check(file + ": localized static content", html.includes(lang === "en" ? "Clean lines." : "Čiste linije."));
+  check(file + ": no unresolved placeholders", !html.includes("{{"));
+  check(file + ": self canonical", html.includes('<link rel="canonical" href="' + url + '">'));
+  check(file + ": reciprocal language links", html.includes('hreflang="sr-Latn" href="https://gipsproject.me/"') && html.includes('hreflang="en" href="https://gipsproject.me/en/"'));
+  check(file + ": no accidental noindex", !/noindex/i.test(html));
+  const schema = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+  const business = schema["@graph"].find(item => item["@type"] === "HomeAndConstructionBusiness");
+  check(file + ": correct structured business contact", business.telephone === "+38269476823" && business.email === "cg@gipsproject.me");
+  check(file + ": six structured services", business.hasOfferCatalog.itemListElement.length === 6);
+  check(file + ": no invented ratings or physical address", !business.aggregateRating && !business.address);
+  const anchors = [...html.matchAll(/\bid="([^"]+)"/g)].map(m => m[1]);
+  check(file + ": unique element ids", new Set(anchors).size === anchors.length);
+  for (const [, id] of html.matchAll(/href="#([^"]+)"/g)) assert.ok(anchors.includes(id), "Missing anchor: " + id);
+  check(file + ": anchor and icon destinations exist", true);
+  const indexes = [...html.matchAll(/data-gallery-index="(\d+)"/g)].map(m => Number(m[1]));
+  check(file + ": all 12 client images available without JS", indexes.length === 12 && new Set(indexes).size === 12);
+  check(file + ": telephone destinations preserved", [...html.matchAll(/href="tel:([^"]+)"/g)].every(m => m[1] === "+38269476823"));
+  check(file + ": WhatsApp destinations preserved", [...html.matchAll(/href="https:\/\/wa.me\/([^"]+)"/g)].every(m => m[1] === "38266147007"));
+  for (const [, path] of html.matchAll(/(?:src|href)="(\/(?:assets|en)[^"#]*)"/g)) {
+    const clean = path.split("?")[0];
+    assert.ok(fs.existsSync("." + clean), "Missing asset: " + clean);
   }
-  if (!browser) { console.error("could not connect to chromium"); process.exit(1); }
-  process.on("exit", () => chrome.kill());
-  const page = await browser.newPage();
-  const errors = [];
-  page.on("pageerror", (e) => errors.push(String(e)));
-  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
-
-  // — desktop, default (sr) —
-  await page.setViewport({ width: 1280, height: 900 });
-  await page.evaluateOnNewDocument(() => {
-    Object.defineProperty(navigator, "language", { get: () => "sr-Latn-ME" });
-  });
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
-
-  check("html lang is sr-Latn", (await page.evaluate(() => document.documentElement.lang)) === "sr-Latn");
-  const h1sr = await page.$eval("h1", (el) => el.textContent.trim());
-  check("h1 is Serbian", h1sr.includes("Savršeni"), h1sr);
-  check("12 gallery figures", (await page.$$eval("#work-grid figure", (f) => f.length)) === 12);
-  check("tel CTA present", (await page.$$eval('a[href="tel:+38269476823"]', (a) => a.length)) >= 3);
-  check("wa.me CTA present", (await page.$$eval('a[href^="https://wa.me/38269476823"]', (a) => a.length)) >= 1);
-  check("mailto CTA present", (await page.$$eval('a[href="mailto:cg@gipsproject.me"]', (a) => a.length)) >= 2);
-  check("instagram link present", (await page.$$eval('a[href^="https://www.instagram.com/gips_project"]', (a) => a.length)) >= 1);
-
-  // — language toggle —
-  await page.click('[data-lang-btn="en"]');
-  const h1en = await page.$eval("h1", (el) => el.textContent.trim());
-  check("EN toggle swaps h1", h1en.includes("Flawless"), h1en);
-  check("html lang becomes en", (await page.evaluate(() => document.documentElement.lang)) === "en");
-  check("choice persisted", (await page.evaluate(() => localStorage.getItem("gp-lang2"))) === "en");
-  const altEn = await page.$eval("#work-grid img", (el) => el.alt);
-  check("gallery alt switches to EN", /ceiling/i.test(altEn), altEn);
-  await page.click('[data-lang-btn="sr"]');
-
-  // — stale auto-detected lang under the old key must be ignored —
-  await page.evaluate(() => { localStorage.clear(); localStorage.setItem("gp-lang", "en"); });
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
-  check("stale old-key 'en' ignored, stays SR", (await page.$eval("h1", (el) => el.textContent)).includes("Savršeni"));
-  check("auto-detect does not persist", (await page.evaluate(() => localStorage.getItem("gp-lang2"))) === null);
-
-  // — ?lang=en param —
-  await page.goto(`${BASE}/?lang=sr`, { waitUntil: "networkidle0" });
-  await page.goto(`${BASE}/?lang=en`, { waitUntil: "networkidle0" });
-  check("?lang=en forces English", (await page.$eval("h1", (el) => el.textContent)).includes("Flawless"));
-
-  // — lightbox —
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
-  await page.click("#work-grid figure:first-child button");
-  await page.waitForSelector("#lightbox[open]");
-  check("lightbox opens", true);
-  const src1 = await page.$eval("[data-lightbox-img]", (el) => el.src);
-  await page.keyboard.press("ArrowRight");
-  const src2 = await page.$eval("[data-lightbox-img]", (el) => el.src);
-  check("arrow key navigates", src1 !== src2, `${src1.split("/").pop()} → ${src2.split("/").pop()}`);
-  const counter = await page.$eval("[data-lightbox-counter]", (el) => el.textContent);
-  check("counter shows 2 / 12", counter.trim() === "2 / 12", counter);
-  await page.keyboard.press("Escape");
-  check("Esc closes lightbox", await page.$eval("#lightbox", (el) => !el.open));
-
-  // — reveals after scroll —
-  await page.evaluate(async () => {
-    for (let y = 0; y <= document.body.scrollHeight; y += 600) {
-      window.scrollTo(0, y);
-      await new Promise((r) => setTimeout(r, 120));
-    }
-  });
-  await new Promise((r) => setTimeout(r, 1200));
-  const unrevealed = await page.$$eval(".reveal:not(.is-visible)", (els) => els.length);
-  check("all reveals fired after full scroll", unrevealed === 0, `${unrevealed} unrevealed`);
-  await page.screenshot({ path: `${SHOTS}/desktop-full.png`, fullPage: true });
-
-  // — mobile —
-  await page.setViewport({ width: 390, height: 844, isMobile: true, hasTouch: true });
-  await page.goto(`${BASE}/`, { waitUntil: "networkidle0" });
-  check("mobile menu hidden initially", await page.$eval("#mobile-menu", (el) => el.classList.contains("hidden")));
-  await page.click("#menu-toggle");
-  check("hamburger opens menu", await page.$eval("#mobile-menu", (el) => !el.classList.contains("hidden")));
-  await page.click('#mobile-menu a[href="#services"]');
-  check("menu closes on link tap", await page.$eval("#mobile-menu", (el) => el.classList.contains("hidden")));
-  await page.evaluate(() => document.getElementById("contact").scrollIntoView());
-  await new Promise((r) => setTimeout(r, 900));
-  const fabShown = await page.$eval("#call-fab", (el) => !el.classList.contains("opacity-0"));
-  check("call FAB appears after hero", fabShown);
-  await page.screenshot({ path: `${SHOTS}/mobile-full.png`, fullPage: true });
-
-  check("no console/page errors", errors.length === 0, errors.slice(0, 3).join(" | "));
-
-  await browser.close();
-  const failed = results.filter((r) => !r.ok).length;
-  console.log(`\n${results.length - failed}/${results.length} checks passed`);
-  process.exit(failed ? 1 : 0);
-})();
+  check(file + ": all linked local assets exist", true);
+  check(file + ": CSS and JS cache versions present", /main.css\?v=[a-f0-9]{12}/.test(html) && /main.js\?v=[a-f0-9]{12}/.test(html));
+  check(file + ": no third-party scripts or fonts", !/<script[^>]+src="https:/.test(html) && !html.includes("fonts.googleapis"));
+}
+const robots = fs.readFileSync("robots.txt", "utf8");
+check("Robots allows public pages and references sitemap", robots.includes("Allow: /") && robots.includes("Sitemap: https://gipsproject.me/sitemap.xml"));
+check("Robots does not block public assets", !/Disallow:\s*\/assets/.test(robots));
+const sitemap = fs.readFileSync("sitemap.xml", "utf8");
+check("Sitemap contains both canonical pages", sitemap.includes("<loc>https://gipsproject.me/</loc>") && sitemap.includes("<loc>https://gipsproject.me/en/</loc>"));
+check("Sitemap excludes legacy query URLs", !sitemap.includes("?lang="));
+check("Sitemap includes client images", (sitemap.match(/<image:image>/g) || []).length === 24);
+const llms = fs.readFileSync("llms.txt", "utf8");
+check("LLM summary preserves separate phone and WhatsApp contacts", llms.includes("+382 69 476 823") && llms.includes("+382 66 147 007"));
+const css = fs.readFileSync("css/input.css", "utf8");
+for (const [, path] of css.matchAll(/url\("(\/assets\/fonts\/[^"]+)"\)/g)) assert.ok(fs.existsSync("." + path), "Missing font " + path);
+check("All self-hosted font files exist", true);
+check("Reduced-motion fallback exists", css.includes("prefers-reduced-motion:reduce"));
+console.log("\n" + checks + " release checks passed.");

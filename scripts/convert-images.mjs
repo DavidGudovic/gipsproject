@@ -62,3 +62,7 @@ await sharp(logo).resize(180, 180, { fit: "contain", background: { r: 251, g: 24
 
 console.table(results);
 console.log("Done. Update content/images.js if the curated list changed.");
+
+// Smaller navigation logo and original portrait used by the redesigned hero.
+await sharp(logo).resize(200, null, { withoutEnlargement: true }).webp({ quality: 86 }).toFile(path.join(root, "assets/img/logo-small.webp"));
+await sharp(src("image33.jpeg")).rotate().webp({ quality: 84 }).toFile(path.join(root, "assets/img/hero.webp"));

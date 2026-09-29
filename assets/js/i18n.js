@@ -1,67 +1,14 @@
-// Locale engine: detects language, applies copy from locales/*.js, persists the choice.
+// Language pages are rendered at build time so copy and metadata work without JavaScript.
 (function () {
-  // v2: the old key was polluted by auto-detected (not user-chosen) values
-  const STORE_KEY = "gp-lang2";
-  // keys whose values contain markup (gold <em> accents) — applied via innerHTML
-  const HTML_KEYS = new Set([
-    "hero.title",
-    "services.title",
-    "work.title",
-    "why.title",
-    "contact.title"
-  ]);
-
-  // DEFAULT LANGUAGE: the final return below. Order: ?lang= URL param,
-  // then the visitor's saved choice, then Serbian.
-  function detectLang() {
-    const param = new URLSearchParams(location.search).get("lang");
-    if (param === "en" || param === "sr") return param;
-    try {
-      const saved = localStorage.getItem(STORE_KEY);
-      if (saved === "en" || saved === "sr") return saved;
-    } catch (e) { /* private mode */ }
-    return "sr";
+  const requested = new URLSearchParams(location.search).get("lang");
+  if (requested === "sr" || requested === "en") {
+    const url = new URL(location.href);
+    url.pathname = requested === "en" ? "/en/" : "/";
+    url.searchParams.delete("lang");
+    location.replace(url.pathname + url.search + url.hash);
+    return;
   }
-
-  function applyLang(lang) {
-    const t = window.GP_I18N[lang] || window.GP_I18N.sr;
-
-    document.querySelectorAll("[data-i18n]").forEach((el) => {
-      const val = t[el.getAttribute("data-i18n")];
-      if (val == null) return;
-      if (HTML_KEYS.has(el.getAttribute("data-i18n"))) el.innerHTML = val;
-      else el.textContent = val;
-    });
-
-    document.querySelectorAll("[data-i18n-attrs]").forEach((el) => {
-      el.getAttribute("data-i18n-attrs").split(",").forEach((pair) => {
-        const [attr, key] = pair.split(":").map((s) => s.trim());
-        if (t[key] != null) el.setAttribute(attr, t[key]);
-      });
-    });
-
-    document.documentElement.lang = lang === "sr" ? "sr-Latn" : "en";
-    document.title = t["meta.title"];
-    document.querySelectorAll("[data-lang-btn]").forEach((btn) => {
-      btn.setAttribute("aria-pressed", String(btn.dataset.langBtn === lang));
-    });
-
-    window.GP_LANG = lang;
-    document.dispatchEvent(new CustomEvent("gp:langchange", { detail: { lang } }));
-  }
-
-  // persisting only happens here — an explicit visitor choice, never auto-detection
-  function chooseLang(lang) {
-    applyLang(lang);
-    try { localStorage.setItem(STORE_KEY, lang); } catch (e) { /* private mode */ }
-  }
-
-  window.GP_LANG = detectLang();
-
-  document.addEventListener("DOMContentLoaded", () => {
-    applyLang(window.GP_LANG);
-    document.querySelectorAll("[data-lang-btn]").forEach((btn) => {
-      btn.addEventListener("click", () => chooseLang(btn.dataset.langBtn));
-    });
+  document.querySelectorAll(".lang-switch a").forEach(link => {
+    link.addEventListener("click", () => { link.hash = location.hash; });
   });
 })();

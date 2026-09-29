@@ -1,6 +1,12 @@
 User-agent: *
 Allow: /
-Disallow: /resources/
+Disallow: /.git/
 Disallow: /node_modules/
+Disallow: /resources/
+Disallow: /scripts/
+Disallow: /templates/
+Disallow: /css/
+Disallow: /locales/
+Disallow: /content/
 
 Sitemap: https://gipsproject.me/sitemap.xml

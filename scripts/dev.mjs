@@ -1,29 +1,20 @@
-// Dev runner: Tailwind watch + static server, both torn down together on Ctrl-C.
-// (tailwind --watch can't be shell-backgrounded with `&` — it exits when stdin
-// closes and truncates the output css on the way out.)
 import { spawn } from "node:child_process";
+import { watch } from "node:fs";
 import { fileURLToPath } from "node:url";
-
 const root = fileURLToPath(new URL("..", import.meta.url));
-const bin = (name) => `${root}node_modules/.bin/${name}`;
-const port = process.env.PORT || "8000";
-
-const tailwind = spawn(
-  bin("tailwindcss"),
-  ["-i", "css/input.css", "-o", "assets/css/main.css", "--watch=always"],
-  { cwd: root, stdio: "inherit" }
-);
-const server = spawn(bin("http-server"), ["-p", port, "-c-1", root], { stdio: "inherit" });
-
-let stopping = false;
-const stop = (code = 0) => {
-  if (stopping) return;
-  stopping = true;
-  tailwind.kill();
-  server.kill();
-  process.exit(code);
-};
-process.on("SIGINT", () => stop(0));
-process.on("SIGTERM", () => stop(0));
-tailwind.on("exit", (code) => stop(code ?? 1));
-server.on("exit", (code) => stop(code ?? 1));
+let building = false, pending = false, debounce;
+const server = spawn(process.execPath, ["node_modules/http-server/bin/http-server", "-p", process.env.PORT || "8000", "-c-1", "-a", "127.0.0.1"], { cwd: root, stdio: "inherit" });
+let builder;
+function build() {
+  if (building) { pending = true; return; }
+  building = true;
+  builder = spawn("npm", ["run", "build"], { cwd: root, stdio: "inherit" });
+  builder.on("exit", () => { building = false; if (pending) { pending = false; build(); } });
+}
+for (const dir of ["templates", "locales", "content", "css", "assets/js"]) {
+  watch(new URL("../" + dir, import.meta.url), () => { clearTimeout(debounce); debounce = setTimeout(build, 100); });
+}
+build();
+function stop() { builder?.kill(); server.kill(); process.exit(); }
+process.on("SIGINT", stop);
+process.on("SIGTERM", stop);

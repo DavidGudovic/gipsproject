@@ -14,10 +14,12 @@
   "author": "",
   "type": "commonjs",
   "scripts": {
-    "build": "tailwindcss -i css/input.css -o assets/css/main.css --minify",
+    "build": "tailwindcss -i css/input.css -o assets/css/main.css --minify && node scripts/build.mjs",
     "dev": "node scripts/dev.mjs",
     "images": "node scripts/convert-images.mjs",
-    "extract-logo": "node scripts/extract-logo.mjs"
+    "extract-logo": "node scripts/extract-logo.mjs",
+    "verify": "node scripts/verify.mjs",
+    "build:public": "npm run build && node scripts/publish.mjs"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.0",
