@@ -224,7 +224,9 @@ summary::-webkit-details-marker{display:none}
 .back-top{font-size:.75rem;margin-left:auto;padding:15px 0}
 .footer-wordmark{font-size:clamp(60px,11.85vw,168px);font-family:var(--font-sans);letter-spacing:-.07em;line-height:1.1;white-space:nowrap;font-weight:500;margin:43px 0 33px;color:#34382f}
 .footer-wordmark>span{font-size:.2em;vertical-align:top;display:inline-block;margin:12px 0 0 5px;color:#a07b40}
-.footer-bottom{padding:22px 0 28px;border-top:1px solid #292b2726;display:flex;justify-content:space-between;gap:15px;font-size:.75rem;color:#62665c}
+.footer-bottom{padding:22px 0 28px;border-top:1px solid #292b2726;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:15px;font-size:.75rem;color:#62665c}
+.footer-credit{line-height:1.8}
+.footer-credit a{display:inline-block;min-height:24px;text-decoration:underline;text-underline-offset:3px}
 .mobile-contact{display:none}
 .lightbox{position:fixed;inset:0;border:0;width:100vw;max-width:none;height:100dvh;max-height:none;background:#181b17f7;color:#f5f1e9;padding:65px 75px}
 .lightbox::backdrop{background:#181b17ee}
