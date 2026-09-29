@@ -8,6 +8,7 @@ const context = { window: {} };
 vm.createContext(context);
 for (const name of ["locales/sr.js", "locales/en.js", "content/images.js"]) vm.runInContext(fs.readFileSync(name, "utf8"), context);
 const locales = context.window.GP_I18N;
+const imageCount = context.window.GP_IMAGES.length;
 check("Both locales contain identical keys", JSON.stringify(Object.keys(locales.sr).sort()) === JSON.stringify(Object.keys(locales.en).sort()));
 for (const [file, lang, url] of [["index.html", "sr-Latn", "https://gipsproject.me/"], ["en/index.html", "en", "https://gipsproject.me/en/"]]) {
   const html = fs.readFileSync(file, "utf8");
@@ -28,7 +29,7 @@ for (const [file, lang, url] of [["index.html", "sr-Latn", "https://gipsproject.
   for (const [, id] of html.matchAll(/href="#([^"]+)"/g)) assert.ok(anchors.includes(id), "Missing anchor: " + id);
   check(file + ": anchor and icon destinations exist", true);
   const indexes = [...html.matchAll(/data-gallery-index="(\d+)"/g)].map(m => Number(m[1]));
-  check(file + ": all 12 client images available without JS", indexes.length === 12 && new Set(indexes).size === 12);
+  check(file + ": all client images available without JS", indexes.length === imageCount && new Set(indexes).size === imageCount);
   check(file + ": telephone destinations preserved", [...html.matchAll(/href="tel:([^"]+)"/g)].every(m => m[1] === "+38269476823"));
   check(file + ": WhatsApp destinations preserved", [...html.matchAll(/href="https:\/\/wa.me\/([^"]+)"/g)].every(m => m[1] === "38266147007"));
   for (const [, path] of html.matchAll(/(?:src|href)="(\/(?:assets|en)[^"#]*)"/g)) {
@@ -45,7 +46,7 @@ check("Robots does not block public assets", !/Disallow:\s*\/assets/.test(robots
 const sitemap = fs.readFileSync("sitemap.xml", "utf8");
 check("Sitemap contains both canonical pages", sitemap.includes("<loc>https://gipsproject.me/</loc>") && sitemap.includes("<loc>https://gipsproject.me/en/</loc>"));
 check("Sitemap excludes legacy query URLs", !sitemap.includes("?lang="));
-check("Sitemap includes client images", (sitemap.match(/<image:image>/g) || []).length === 24);
+check("Sitemap includes client images", (sitemap.match(/<image:image>/g) || []).length === imageCount * 2);
 const llms = fs.readFileSync("llms.txt", "utf8");
 check("LLM summary preserves separate phone and WhatsApp contacts", llms.includes("+382 69 476 823") && llms.includes("+382 66 147 007"));
 const css = fs.readFileSync("css/input.css", "utf8");

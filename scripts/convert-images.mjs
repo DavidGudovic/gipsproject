@@ -25,6 +25,20 @@ const CURATED = [
   "image30.jpeg", // curved stud framing
   "image14.jpeg", // perforated acoustic ceiling
   "image17.jpeg", // commercial suspended ceiling build
+  "client-2026-09-29-00.jpeg",
+  "client-2026-09-29-01.jpeg",
+  "client-2026-09-29-02.jpeg",
+  "client-2026-09-29-03.jpeg",
+  "client-2026-09-29-04.jpeg",
+  "client-2026-09-29-05.jpeg",
+  "client-2026-09-29-06.jpeg",
+  "client-2026-09-29-07.jpeg",
+  "client-2026-09-29-08.jpeg",
+  "client-2026-09-29-09.jpeg",
+  "client-2026-09-29-10.jpeg",
+  "client-2026-09-29-11.jpeg",
+  "client-2026-09-29-12.jpeg",
+  "client-2026-09-29-13.jpeg",
 ];
 
 const results = [];

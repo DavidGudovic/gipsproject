@@ -70,7 +70,7 @@
     </div>
     <div class="hero-visual">
       <div class="hero-frame"><img class="hero-image" src="/assets/img/hero.webp" width="360" height="640" alt="{{hero.imageAlt}}" fetchpriority="high"><div class="image-shade"></div><div class="hero-image-title"><span class="eyebrow">GIPS PROJECT / 01</span><p>{{hero.imageLabel}}</p></div><span class="photo-corner top"></span><span class="photo-corner bottom"></span></div>
-      <div class="hero-caption"><span>{{hero.imageCaption}}</span><span>01 / 12</span></div>
+      <div class="hero-caption"><span>{{hero.imageCaption}}</span><span>01 / {{imageCount}}</span></div>
       <a class="hero-seal" href="#work" aria-label="{{hero.work}}"><span>GIPS<br>PROJECT</span><svg class="icon"><use href="#diagonal"/></svg></a>
     </div>
     <a class="hero-scroll" href="#services"><span class="scroll-line"></span>{{hero.scroll}}<span>↓</span></a>
@@ -93,7 +93,7 @@
       <div class="work-viewport" id="work-viewport"><div class="work-track" id="work-track">{{featured}}</div></div>
       <div class="work-bottom wrap"><span class="work-counter"><span id="work-current">01</span> <span>/ 04</span></span><div class="work-progress" aria-hidden="true"><span id="work-progress"></span></div><span class="work-signature">GIPS PROJECT</span></div>
     </div></div>
-    <div class="wrap work-more"><details class="full-gallery"><summary>{{work.all}}<span>{{work.count}}</span><svg class="icon"><use href="#plus"/></svg></summary><div class="gallery-grid">{{gallery}}</div></details></div>
+    <div class="wrap work-more"><div class="gallery-heading"><h3>{{work.more}}</h3><p>{{work.count}}</p></div><div class="gallery-grid gallery-preview">{{preview}}</div><details class="full-gallery"><summary>{{work.all}}<span>{{work.count}}</span><svg class="icon"><use href="#plus"/></svg></summary><div class="gallery-grid">{{gallery}}</div></details></div>
   </section>
   <section class="process wrap section-pad" id="process">
     <div class="process-photo reveal"><img src="/assets/img/work/work-02.webp" width="480" height="640" alt="{{process.imageAlt}}" loading="lazy" decoding="async"><div><span class="eyebrow">GIPS PROJECT</span><p>{{process.imageLabel}}</p></div></div>

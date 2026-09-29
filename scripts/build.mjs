@@ -12,7 +12,8 @@ const hash = crypto.createHash("sha256");
 for (const file of ["assets/css/main.css", "assets/js/main.js", "assets/js/gallery.js", "assets/js/i18n.js"]) hash.update(fs.readFileSync(file));
 const version = hash.digest("hex").slice(0, 12);
 const services = ["ceilings", "partitions", "boards", "decorative", "insulation", "finishing"];
-const featured = [0, 3, 2, 7];
+const featured = [19, 12, 0, 3];
+const preview = [24, 22, 20, 15, 18, 25];
 const icons = [
 '<path d="M3 5h26v7H3zM7 12v15h18V12M3 20h26M12 5v7M20 5v7"/>',
 '<path d="M5 4h22v24H5zM12 4v24M20 4v24M5 12h22M5 20h22"/>',
@@ -39,6 +40,8 @@ for (const [lang, t] of Object.entries(locales)) {
     ]
   };
   const blocks = {
+    imageCount: images.length,
+    "work.count": esc(t["work.count"].replace("{count}", images.length)),
     ogImageAlt: esc(images[0].alt[lang]),
     htmlLang: lang === "sr" ? "sr-Latn" : "en", url, home, version,
     ogLocale: lang === "sr" ? "sr_ME" : "en_GB", ogAlternate: lang === "sr" ? "en_GB" : "sr_ME",
@@ -46,7 +49,8 @@ for (const [lang, t] of Object.entries(locales)) {
     schema: JSON.stringify(schema).replace(/</g, "\\u003c"),
     services: services.map((s, i) => '<a class="service-item reveal" href="#contact" aria-label="' + esc(t["services.link"] + " " + t["services." + s + ".title"]) + '"><span class="service-number">0' + (i + 1) + '</span><svg class="service-icon" viewBox="0 0 32 32" aria-hidden="true">' + icons[i] + '</svg><h3>' + esc(t["services." + s + ".title"]) + '</h3><p>' + esc(t["services." + s + ".desc"]) + '</p><svg class="icon service-arrow"><use href="#diagonal"/></svg></a>').join("\n"),
     featured: featured.map(i => figure(i)).join("\n"),
-    gallery: images.map((_, i) => featured.includes(i) ? "" : figure(i)).join("\n"),
+    preview: preview.map(i => figure(i)).join("\n"),
+    gallery: images.map((_, i) => featured.includes(i) || preview.includes(i) ? "" : figure(i)).join("\n"),
     steps: [1, 2, 3].map(i => '<li class="reveal"><span>0' + i + '</span><div><h3>' + esc(t["process." + i + ".title"]) + '</h3><p>' + esc(t["process." + i + ".desc"]) + '</p></div></li>').join("\n"),
     faq: [1, 2, 3, 4, 5].map(i => '<details><summary>' + esc(t["faq." + i + ".q"]) + '<svg class="icon" aria-hidden="true"><use href="#plus"/></svg></summary><p>' + esc(t["faq." + i + ".a"]) + '</p></details>').join("\n")
   };
