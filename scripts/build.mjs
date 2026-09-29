@@ -47,7 +47,7 @@ for (const [lang, t] of Object.entries(locales)) {
     ogLocale: lang === "sr" ? "sr_ME" : "en_GB", ogAlternate: lang === "sr" ? "en_GB" : "sr_ME",
     srCurrent: lang === "sr" ? 'aria-current="page"' : "", enCurrent: lang === "en" ? 'aria-current="page"' : "",
     schema: JSON.stringify(schema).replace(/</g, "\\u003c"),
-    services: services.map((s, i) => '<a class="service-item reveal" href="#contact" aria-label="' + esc(t["services.link"] + " " + t["services." + s + ".title"]) + '"><span class="service-number">0' + (i + 1) + '</span><svg class="service-icon" viewBox="0 0 32 32" aria-hidden="true">' + icons[i] + '</svg><h3>' + esc(t["services." + s + ".title"]) + '</h3><p>' + esc(t["services." + s + ".desc"]) + '</p><svg class="icon service-arrow"><use href="#diagonal"/></svg></a>').join("\n"),
+    services: services.map((s, i) => '<a class="service-item reveal" href="#contact"><span class="service-number" aria-hidden="true">0' + (i + 1) + '</span><svg class="service-icon" viewBox="0 0 32 32" aria-hidden="true">' + icons[i] + '</svg><h3>' + esc(t["services." + s + ".title"]) + '</h3><p>' + esc(t["services." + s + ".desc"]) + '</p><svg class="icon service-arrow"><use href="#diagonal"/></svg></a>').join("\n"),
     featured: featured.map(i => figure(i)).join("\n"),
     preview: preview.map(i => figure(i)).join("\n"),
     gallery: images.map((_, i) => featured.includes(i) || preview.includes(i) ? "" : figure(i)).join("\n"),
