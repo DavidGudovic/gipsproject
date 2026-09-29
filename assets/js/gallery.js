@@ -1,6 +1,8 @@
 (function () {
   "use strict";
-  const links = [...document.querySelectorAll("[data-gallery-index]")].sort((a,b) => Number(a.dataset.galleryIndex) - Number(b.dataset.galleryIndex));
+  const openers = [...document.querySelectorAll("[data-gallery-index]")];
+  const links = [...new Map(openers.map(link => [link.dataset.galleryIndex, link])).values()].sort((a,b) => Number(a.dataset.galleryIndex) - Number(b.dataset.galleryIndex));
+  let activeLinks = links;
   const dialog = document.getElementById("lightbox");
   if (!dialog || typeof dialog.showModal !== "function") return;
   const image = dialog.querySelector("[data-lightbox-img]");
@@ -9,17 +11,19 @@
   let current = 0;
   let opener;
   function show(index) {
-    current = (index + links.length) % links.length;
-    image.src = links[current].href;
-    image.alt = links[current].querySelector("img").alt;
+    current = (index + activeLinks.length) % activeLinks.length;
+    image.src = activeLinks[current].href;
+    image.alt = activeLinks[current].querySelector("img").alt;
     caption.textContent = image.alt;
-    counter.textContent = (current + 1) + " / " + links.length;
+    counter.textContent = (current + 1) + " / " + activeLinks.length;
   }
-  links.forEach((link, index) => link.addEventListener("click", e => {
+  openers.forEach(link => link.addEventListener("click", e => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     e.preventDefault();
     opener = link;
-    show(index);
+    const filter = link.closest(".portfolio-grid")?.dataset.activeFilter;
+    activeLinks = !filter || filter === "all" ? links : links.filter(item => item.closest("[data-categories]").dataset.categories.split(" ").includes(filter));
+    show(activeLinks.findIndex(item => item.dataset.galleryIndex === link.dataset.galleryIndex));
     dialog.showModal();
     document.body.classList.add("gallery-open");
   }));

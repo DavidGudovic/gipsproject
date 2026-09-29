@@ -8,12 +8,16 @@ for (const file of ["locales/sr.js", "locales/en.js", "content/images.js"]) vm.r
 const { GP_I18N: locales, GP_IMAGES: images } = context.window;
 const template = fs.readFileSync("templates/index.html", "utf8");
 const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+// One deferred request; keep the small feature modules readable in source.
+const scripts = ["i18n", "gallery", "main", "portfolio", "enquiry"];
+fs.writeFileSync("assets/js/site.js", scripts.map(name => fs.readFileSync("assets/js/" + name + ".js", "utf8")).join("\n"));
 const hash = crypto.createHash("sha256");
-for (const file of ["assets/css/main.css", "assets/js/main.js", "assets/js/gallery.js", "assets/js/i18n.js"]) hash.update(fs.readFileSync(file));
+for (const file of ["assets/css/main.css", "assets/js/site.js"]) hash.update(fs.readFileSync(file));
 const version = hash.digest("hex").slice(0, 12);
 const services = ["ceilings", "partitions", "boards", "decorative", "insulation", "finishing"];
 const featured = [19, 12, 0, 3];
-const preview = [24, 22, 20, 15, 18, 25];
+const portfolioOrder = [18, 2, 20, 22, 15, 24, 12, 19, 0, 3, 17, 6, 13, 14, 9, 7, 10, 11, 23, 25, 16, 21, 5, 8, 4, 1];
+const categories = ["all", "ceilings", "walls", "decorative", "structure"];
 const icons = [
 '<path d="M3 5h26v7H3zM7 12v15h18V12M3 20h26M12 5v7M20 5v7"/>',
 '<path d="M5 4h22v24H5zM12 4v24M20 4v24M5 12h22M5 20h22"/>',
@@ -28,7 +32,7 @@ for (const [lang, t] of Object.entries(locales)) {
   const url = "https://gipsproject.me" + home;
   const figure = (index, extra = "") => {
     const img = images[index];
-    return '<figure class="work-card ' + extra + '"><a href="/' + img.src + '" class="gallery-link" data-gallery-index="' + index + '" aria-label="' + esc(t["work.open"] + ": " + img.alt[lang]) + '"><div class="work-image"><img src="/' + img.thumb + '" width="' + img.w + '" height="' + img.h + '" alt="' + esc(img.alt[lang]) + '" loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">↗</span></div></a><figcaption><span>' + esc(img.alt[lang]) + '</span><span>' + String(index + 1).padStart(2, "0") + '</span></figcaption></figure>';
+    return '<figure class="work-card ' + extra + '" data-categories="' + img.categories.join(' ') + '"><a href="/' + img.src + '" class="gallery-link" data-gallery-index="' + index + '" aria-label="' + esc(t["work.open"] + ": " + img.alt[lang]) + '"><div class="work-image"><img src="/' + img.thumb + '" width="' + img.w + '" height="' + img.h + '" alt="' + esc(img.alt[lang]) + '" loading="lazy" decoding="async"><span class="image-expand" aria-hidden="true">↗</span></div></a><figcaption><span>' + esc(img.alt[lang]) + '</span><span>' + String(index + 1).padStart(2, "0") + '</span></figcaption></figure>';
   };
   const businessId = "https://gipsproject.me/#business";
   const schema = {
@@ -41,16 +45,19 @@ for (const [lang, t] of Object.entries(locales)) {
   };
   const blocks = {
     imageCount: images.length,
+    // These faces are all used in the first screen; preload only the locale's glyph sets.
+    fontPreloads: ["fraunces-italic-latin", ...(lang === "sr" ? ["fraunces-ext", "fraunces-italic-ext", "manrope-ext"] : [])].map(name => '<link rel="preload" href="/assets/fonts/' + name + '.woff2" as="font" type="font/woff2" crossorigin>').join("\n  "),
     "work.count": esc(t["work.count"].replace("{count}", images.length)),
     ogImageAlt: esc(images[0].alt[lang]),
     htmlLang: lang === "sr" ? "sr-Latn" : "en", url, home, version,
     ogLocale: lang === "sr" ? "sr_ME" : "en_GB", ogAlternate: lang === "sr" ? "en_GB" : "sr_ME",
     srCurrent: lang === "sr" ? 'aria-current="page"' : "", enCurrent: lang === "en" ? 'aria-current="page"' : "",
     schema: JSON.stringify(schema).replace(/</g, "\\u003c"),
-    services: services.map((s, i) => '<a class="service-item reveal" href="#contact"><span class="service-number" aria-hidden="true">0' + (i + 1) + '</span><svg class="service-icon" viewBox="0 0 32 32" aria-hidden="true">' + icons[i] + '</svg><h3>' + esc(t["services." + s + ".title"]) + '</h3><p>' + esc(t["services." + s + ".desc"]) + '</p><svg class="icon service-arrow"><use href="#diagonal"/></svg></a>').join("\n"),
+    services: services.map((s, i) => '<a class="service-item reveal" href="#contact" data-enquiry-service="' + s + '"><span class="service-number" aria-hidden="true">0' + (i + 1) + '</span><svg class="service-icon" viewBox="0 0 32 32" aria-hidden="true">' + icons[i] + '</svg><h3>' + esc(t["services." + s + ".title"]) + '</h3><p>' + esc(t["services." + s + ".desc"]) + '</p><svg class="icon service-arrow"><use href="#diagonal"/></svg></a>').join("\n"),
     featured: featured.map(i => figure(i)).join("\n"),
-    preview: preview.map(i => figure(i)).join("\n"),
-    gallery: images.map((_, i) => featured.includes(i) || preview.includes(i) ? "" : figure(i)).join("\n"),
+    portfolio: portfolioOrder.map(i => figure(i)).join("\n"),
+    portfolioFilters: categories.map(c => '<button type="button" class="portfolio-filter" data-filter="' + c + '" data-description="' + esc(t['portfolio.description.' + c]) + '" aria-pressed="' + (c === 'all') + '" aria-controls="portfolio-grid">' + esc(t['portfolio.' + c]) + '<span aria-hidden="true">' + (c === 'all' ? images.length : images.filter(i => i.categories.includes(c)).length) + '</span></button>').join(''),
+    enquiryOptions: services.map(s => '<option value="' + s + '">' + esc(t['services.' + s + '.title']) + '</option>').join(''),
     steps: [1, 2, 3].map(i => '<li class="reveal"><span>0' + i + '</span><div><h3>' + esc(t["process." + i + ".title"]) + '</h3><p>' + esc(t["process." + i + ".desc"]) + '</p></div></li>').join("\n"),
     faq: [1, 2, 3, 4, 5].map(i => '<details><summary>' + esc(t["faq." + i + ".q"]) + '<svg class="icon" aria-hidden="true"><use href="#plus"/></svg></summary><p>' + esc(t["faq." + i + ".a"]) + '</p></details>').join("\n")
   };
